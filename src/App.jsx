@@ -1,81 +1,51 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Nav from './components/Nav';
+import Chat from './views/Chat';
+import Personality from './views/Playground';
+import Auth from './views/Auth';
 import './App.css';
 
-const LLM_URL = import.meta.env.VITE_LLM_URL ?? 'http://localhost:8000';
+function getStoredUser() {
+  try {
+    const raw = sessionStorage.getItem('raptor_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function App() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const bottomRef = useRef(null);
+  const [user, setUser] = useState(getStoredUser);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  async function send() {
-    const text = input.trim();
-    if (!text || loading) return;
-
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', text }]);
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${LLM_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'bot', text: data.response }]);
-    } catch {
-      setMessages(prev => [...prev, { role: 'bot', text: 'Failed to reach Raptor LLM.', error: true }]);
-    } finally {
-      setLoading(false);
-    }
+  function handleLogin(userData) {
+    setUser(userData);
   }
 
-  function onKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
+  function handleLogout() {
+    sessionStorage.removeItem('raptor_token');
+    sessionStorage.removeItem('raptor_user');
+    setUser(null);
   }
 
   return (
-    <div className="chat">
-      <div className="chat__header">Raptor LLM</div>
-
-      <div className="chat__messages">
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`msg msg--${m.role}${m.error ? ' msg--thinking' : ''}`}
-          >
-            {m.text}
-          </div>
-        ))}
-        {loading && <div className="msg msg--bot msg--thinking">Thinking...</div>}
-        <div ref={bottomRef} />
+    <BrowserRouter>
+      <div className="layout">
+        <Nav user={user} onLogout={handleLogout} />
+        <main className="layout__main">
+          <Routes>
+            <Route path="/" element={<Chat />} />
+            <Route
+              path="/personality"
+              element={user ? <Personality /> : <Navigate to="/auth" replace state={{ from: '/personality' }} />}
+            />
+            <Route
+              path="/auth"
+              element={user ? <Navigate to="/" replace /> : <Auth onLogin={handleLogin} />}
+            />
+          </Routes>
+        </main>
       </div>
-
-      <form className="chat__form" onSubmit={e => { e.preventDefault(); send(); }}>
-        <textarea
-          className="chat__input"
-          rows={1}
-          placeholder="Message Raptor..."
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={onKeyDown}
-          disabled={loading}
-        />
-        <button className="chat__send" type="submit" disabled={loading || !input.trim()}>
-          ?
-        </button>
-      </form>
-    </div>
+    </BrowserRouter>
   );
 }

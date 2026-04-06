@@ -1,0 +1,205 @@
+import { useState } from 'react';
+
+function saveSession(data, onLogin) {
+  sessionStorage.setItem('raptor_token', data.token);
+  sessionStorage.setItem('raptor_user', JSON.stringify({ email: data.email, displayName: data.displayName }));
+  onLogin?.({ email: data.email, displayName: data.displayName });
+}
+
+function LoginForm({ onLogin }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      saveSession(data, onLogin);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form className="auth-form" onSubmit={handleSubmit} noValidate>
+      <label className="field">
+        <span className="field__label">E-mail</span>
+        <input
+          className="field__input"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          disabled={loading}
+          required
+        />
+      </label>
+      <label className="field">
+        <span className="field__label">Senha</span>
+        <input
+          className="field__input"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          disabled={loading}
+          required
+        />
+      </label>
+      {error && <div className="alert alert--error">{error}</div>}
+      <button
+        className="btn btn--primary btn--full"
+        type="submit"
+        disabled={loading || !email.trim() || !password}
+      >
+        {loading ? 'Entrando…' : 'Entrar'}
+      </button>
+    </form>
+  );
+}
+
+function RegisterForm({ onLogin }) {
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (loading) return;
+    if (password !== confirm) {
+      setError('As senhas não coincidem.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password, displayName: displayName.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      saveSession(data, onLogin);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const canSubmit = email.trim() && displayName.trim() && password && confirm && !loading;
+
+  return (
+    <form className="auth-form" onSubmit={handleSubmit} noValidate>
+      <label className="field">
+        <span className="field__label">Nome</span>
+        <input
+          className="field__input"
+          type="text"
+          autoComplete="name"
+          placeholder="Como quer ser chamado?"
+          value={displayName}
+          onChange={e => setDisplayName(e.target.value)}
+          disabled={loading}
+          required
+        />
+      </label>
+      <label className="field">
+        <span className="field__label">E-mail</span>
+        <input
+          className="field__input"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          disabled={loading}
+          required
+        />
+      </label>
+      <label className="field">
+        <span className="field__label">Senha</span>
+        <input
+          className="field__input"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Mínimo 6 caracteres"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          disabled={loading}
+          required
+        />
+      </label>
+      <label className="field">
+        <span className="field__label">Confirmar senha</span>
+        <input
+          className="field__input"
+          type="password"
+          autoComplete="new-password"
+          value={confirm}
+          onChange={e => setConfirm(e.target.value)}
+          disabled={loading}
+          required
+        />
+      </label>
+      {error && <div className="alert alert--error">{error}</div>}
+      <button
+        className="btn btn--primary btn--full"
+        type="submit"
+        disabled={!canSubmit}
+      >
+        {loading ? 'Criando conta…' : 'Criar conta'}
+      </button>
+    </form>
+  );
+}
+
+export default function Auth({ onLogin }) {
+  const [tab, setTab] = useState('login');
+
+  return (
+    <div className="view auth-view">
+      <div className="auth-card">
+        <div className="auth-card__logo">🦅 Raptor</div>
+
+        <div className="auth-tabs">
+          <button
+            className={`auth-tab${tab === 'login' ? ' auth-tab--active' : ''}`}
+            onClick={() => setTab('login')}
+            type="button"
+          >
+            Entrar
+          </button>
+          <button
+            className={`auth-tab${tab === 'register' ? ' auth-tab--active' : ''}`}
+            onClick={() => setTab('register')}
+            type="button"
+          >
+            Cadastrar
+          </button>
+        </div>
+
+        {tab === 'login'
+          ? <LoginForm onLogin={onLogin} />
+          : <RegisterForm onLogin={onLogin} />
+        }
+      </div>
+    </div>
+  );
+}
