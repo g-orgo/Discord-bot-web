@@ -534,6 +534,76 @@
 /* ── Misc ────────────────────────────────────────────────── */
 .settings__loading { color: #4a5570; font-size: 0.875rem; }
 
+/* ── Profile ─────────────────────────────────────────────── */
+.nav__user-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nav__user-link:hover { color: #c8d8f8; }
+.nav__discord-badge { margin-left: 5px; font-size: 0.85em; }
+
+.profile__card {
+  background: #0f1b35;
+  border: 1px solid #1e2d50;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7a8aaa;
+}
+
+.profile__value {
+  font-size: 0.92rem;
+  color: #c8d8f8;
+}
+
+.profile__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile__section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.profile__section-desc {
+  font-size: 0.875rem;
+  color: #7a8aaa;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.alert { font-size: 0.875rem; padding: 8px 12px; border-radius: 8px; }
+.alert--error { background: #2a1010; border: 1px solid #7a3030; color: #f47a7a; }
+.alert--success { background: #0a2a18; border: 1px solid #1e6040; color: #7af4b8; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px 20px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s, opacity 0.2s; border: none; }
+.btn--primary { background: #1a4fc4; color: #fff; }
+.btn--primary:hover:not(:disabled) { background: #2260d4; }
+.btn--ghost { background: transparent; border: 1px solid #1e2d50; color: #7a8aaa; }
+.btn--ghost:hover:not(:disabled) { background: #0f1b35; }
+.btn--full { width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 640px) {
   .layout { flex-direction: column-reverse; }

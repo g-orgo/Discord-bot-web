@@ -37,7 +37,7 @@ function LoginForm({ onLogin }) {
         />
       </label>
       <label className="field">
-        <span className="field__label">Senha</span>
+        <span className="field__label">Password</span>
         <input
           className="field__input"
           type="password"
@@ -54,7 +54,7 @@ function LoginForm({ onLogin }) {
         type="submit"
         disabled={loading || !email.trim() || !password}
       >
-        {loading ? 'Entrando…' : 'Entrar'}
+        {loading ? 'Signing in…' : 'Sign in'}
       </button>
     </form>
   );
@@ -72,7 +72,7 @@ function RegisterForm({ onLogin }) {
     e.preventDefault();
     if (loading) return;
     if (password !== confirm) {
-      setError('As senhas não coincidem.');
+      setError('Passwords do not match.');
       return;
     }
     setLoading(true);
@@ -97,7 +97,7 @@ function RegisterForm({ onLogin }) {
           className="field__input"
           type="text"
           autoComplete="name"
-          placeholder="Como quer ser chamado?"
+          placeholder="What should we call you?"
           value={displayName}
           onChange={e => setDisplayName(e.target.value)}
           disabled={loading}
@@ -117,12 +117,12 @@ function RegisterForm({ onLogin }) {
         />
       </label>
       <label className="field">
-        <span className="field__label">Senha</span>
+        <span className="field__label">Password</span>
         <input
           className="field__input"
           type="password"
           autoComplete="new-password"
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Minimum 6 characters"
           value={password}
           onChange={e => setPassword(e.target.value)}
           disabled={loading}
@@ -130,7 +130,7 @@ function RegisterForm({ onLogin }) {
         />
       </label>
       <label className="field">
-        <span className="field__label">Confirmar senha</span>
+        <span className="field__label">Confirm password</span>
         <input
           className="field__input"
           type="password"
@@ -147,7 +147,7 @@ function RegisterForm({ onLogin }) {
         type="submit"
         disabled={!canSubmit}
       >
-        {loading ? 'Criando conta…' : 'Criar conta'}
+        {loading ? 'Creating account…' : 'Create account'}
       </button>
     </form>
   );
@@ -167,14 +167,14 @@ export default function Auth({ onLogin }) {
             onClick={() => setTab('login')}
             type="button"
           >
-            Entrar
+            Sign in
           </button>
           <button
             className={`auth-tab${tab === 'register' ? ' auth-tab--active' : ''}`}
             onClick={() => setTab('register')}
             type="button"
           >
-            Cadastrar
+            Register
           </button>
         </div>
 

@@ -61,7 +61,7 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
             className="chat__new"
             onClick={() => setMessages([])}
           >
-            Novo chat
+            New chat
           </button>
         )}
       </div>

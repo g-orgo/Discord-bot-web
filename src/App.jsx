@@ -5,12 +5,13 @@ import Chat from './views/Chat';
 import Personality from './views/Playground';
 import Auth from './views/Auth';
 import History from './views/History';
+import Profile from './views/Profile';
 import { useAuth } from './hooks/useAuth.js';
 import { useHistory } from './hooks/useHistory.js';
 import './App.css';
 
 export default function App() {
-  const { user, handleLogin, handleLogout } = useAuth();
+  const { user, handleLogin, handleLogout, updateDiscord } = useAuth();
   const { recentHistory, refresh: refreshHistory, clear: clearRecentHistory } = useHistory(user);
   const [restoredContext, setRestoredContext] = useState(null);
 
@@ -53,6 +54,10 @@ export default function App() {
             <Route
               path="/history"
               element={user ? <History /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
+            />
+            <Route
+              path="/profile"
+              element={user ? <Profile user={user} onDiscordUpdate={updateDiscord} /> : <Navigate to="/auth" replace state={{ from: '/profile' }} />}
             />
             <Route
               path="/auth"

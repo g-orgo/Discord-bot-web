@@ -11,7 +11,11 @@ export function getStoredUser() {
 
 function saveSession(data) {
   sessionStorage.setItem('raptor_token', data.token);
-  sessionStorage.setItem('raptor_user', JSON.stringify({ email: data.email, displayName: data.displayName }));
+  sessionStorage.setItem('raptor_user', JSON.stringify({
+    email: data.email,
+    displayName: data.displayName,
+    discordUsername: data.discordUsername ?? null,
+  }));
 }
 
 function clearSession() {
@@ -24,7 +28,7 @@ export function useAuth() {
 
   function handleLogin(data) {
     saveSession(data);
-    setUser({ email: data.email, displayName: data.displayName });
+    setUser({ email: data.email, displayName: data.displayName, discordUsername: data.discordUsername ?? null });
   }
 
   function handleLogout() {
@@ -32,5 +36,11 @@ export function useAuth() {
     setUser(null);
   }
 
-  return { user, handleLogin, handleLogout };
+  function updateDiscord(discordUsername) {
+    const updated = { ...user, discordUsername: discordUsername ?? null };
+    sessionStorage.setItem('raptor_user', JSON.stringify(updated));
+    setUser(updated);
+  }
+
+  return { user, handleLogin, handleLogout, updateDiscord };
 }

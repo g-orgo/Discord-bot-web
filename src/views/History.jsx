@@ -14,7 +14,7 @@ export default function History() {
   }, []);
 
   async function clearHistory() {
-    if (!window.confirm('Limpar todo o histórico? Esta ação não pode ser desfeita.')) return;
+    if (!window.confirm('Clear all history? This action cannot be undone.')) return;
     setClearing(true);
     try {
       await clearHistoryApi();
@@ -25,7 +25,7 @@ export default function History() {
   }
 
   function formatDate(iso) {
-    return new Date(iso).toLocaleString('pt-BR', {
+    return new Date(iso).toLocaleString('en-US', {
       day: '2-digit', month: '2-digit', year: '2-digit',
       hour: '2-digit', minute: '2-digit',
     });
@@ -34,19 +34,19 @@ export default function History() {
   return (
     <div className="view history-view">
       <div className="view__header">
-        <h1 className="view__title">Histórico</h1>
-        <p className="view__subtitle">Suas últimas interações com o Raptor LLM.</p>
+        <h1 className="view__title">History</h1>
+        <p className="view__subtitle">Your latest interactions with Raptor LLM.</p>
         {entries.length > 0 && (
           <button className="history__clear" onClick={clearHistory} disabled={clearing} type="button">
-            {clearing ? 'Limpando…' : 'Limpar histórico'}
+            {clearing ? 'Clearing…' : 'Clear history'}
           </button>
         )}
       </div>
 
-      {loading && <p className="history__empty">Carregando…</p>}
+      {loading && <p className="history__empty">Loading…</p>}
 
       {!loading && entries.length === 0 && (
-        <p className="history__empty">Nenhuma interação registrada ainda. Envie uma mensagem no Chat!</p>
+        <p className="history__empty">No interactions yet. Send a message in Chat!</p>
       )}
 
       <ul className="history__list">
@@ -57,7 +57,7 @@ export default function History() {
               {entry.model && <span className="history__model">{entry.model}</span>}
             </div>
             <div className="history__user">
-              <span className="history__label">Você</span>
+              <span className="history__label">You</span>
               <p className="history__text">{entry.userMessage}</p>
             </div>
             <div className="history__bot">

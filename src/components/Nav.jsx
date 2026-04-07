@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 const BASE_LINKS = [
   { to: '/', label: 'Chat', icon: '💬' },
-  { to: '/personality', label: 'Personalidade', icon: '🎭' },
+  { to: '/personality', label: 'Personality', icon: '🎭' },
 ];
 
 export default function Nav({ user, onLogout, recentHistory, onRestoreHistory }) {
@@ -44,14 +44,14 @@ export default function Nav({ user, onLogout, recentHistory, onRestoreHistory })
               className={({ isActive }) => `nav__dropdown-main${isActive ? ' nav__link--active' : ''}`}
             >
               <span className="nav__icon">📋</span>
-              <span className="nav__label">Histórico</span>
+              <span className="nav__label">History</span>
             </NavLink>
             {user && recentHistory.length > 0 && (
               <button
                 type="button"
                 className="nav__dropdown-chevron"
                 onClick={() => setHistoryOpen(o => !o)}
-                aria-label="Expandir histórico"
+                aria-label="Expand history"
               >
                 {historyOpen ? '▴' : '▾'}
               </button>
@@ -80,9 +80,15 @@ export default function Nav({ user, onLogout, recentHistory, onRestoreHistory })
       <div className="nav__bottom">
         {user ? (
           <div className="nav__user">
-            <span className="nav__user-name">{user.displayName}</span>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) => `nav__user-name nav__user-link${isActive ? ' nav__link--active' : ''}`}
+            >
+              {user.displayName}
+              {user.discordUsername && <span className="nav__discord-badge" title={`Discord: ${user.discordUsername}`}>🎮</span>}
+            </NavLink>
             <button className="nav__logout" onClick={onLogout} type="button">
-              Sair
+              Sign out
             </button>
           </div>
         ) : (

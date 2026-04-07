@@ -3,17 +3,17 @@ import { useState, useEffect } from 'react';
 const PRESETS = [
   {
     id: 'empathetic',
-    label: 'Empático',
+    label: 'Empathetic',
     emoji: '🤗',
-    description: 'Caloroso, acolhedor e receptivo. Reescreve mensagens com empatia e tom gentil.',
+    description: 'Warm, welcoming, and receptive. Rewrites messages with empathy and a gentle tone.',
     prompt:
       'You are an empathetic and welcoming communication assistant. Rewrite the user\'s message in a warmer, kinder, and more receptive way, keeping the original meaning intact. Always respond in modern English. Use a casual, friendly tone. Reply with the rewritten message only — no explanations.',
   },
   {
     id: 'professional',
-    label: 'Profissional',
+    label: 'Professional',
     emoji: '💼',
-    description: 'Formal, objetivo e claro. Ideal para e-mails corporativos e comunicações de negócio.',
+    description: 'Formal, objective, and clear. Ideal for corporate emails and business communications.',
     prompt:
       'You are a professional communication assistant. Rewrite the user\'s message in a formal, clear, and concise way suitable for business communication. Always respond in English. Reply with the rewritten message only — no explanations.',
   },
@@ -21,31 +21,31 @@ const PRESETS = [
     id: 'casual',
     label: 'Casual',
     emoji: '😎',
-    description: 'Descontraído, direto e com personalidade. Usa gírias modernas com moderação.',
+    description: 'Relaxed, direct, and with personality. Uses modern slang sparingly.',
     prompt:
       'You are a casual and friendly communication assistant. Rewrite the user\'s message in a relaxed, conversational way with a bit of personality. Use modern slang sparingly. Always respond in English. Reply with the rewritten message only — no explanations.',
   },
   {
     id: 'concise',
-    label: 'Conciso',
+    label: 'Concise',
     emoji: '⚡',
-    description: 'Vai direto ao ponto. Remove qualquer redundância sem perder o significado.',
+    description: 'Gets straight to the point. Removes any redundancy without losing the meaning.',
     prompt:
       'You are a concise communication assistant. Rewrite the user\'s message as briefly as possible without losing the core meaning. Cut every unnecessary word. Always respond in English. Reply with the rewritten message only — no explanations.',
   },
   {
     id: 'creative',
-    label: 'Criativo',
+    label: 'Creative',
     emoji: '🎨',
-    description: 'Expressivo e original. Adiciona metáforas, vivacidade e um toque único.',
+    description: 'Expressive and original. Adds metaphors, vividness, and a unique touch.',
     prompt:
       'You are a creative communication assistant. Rewrite the user\'s message in an expressive, vivid, and original way — use metaphors and colorful language where fitting. Always respond in English. Reply with the rewritten message only — no explanations.',
   },
   {
     id: 'custom',
-    label: 'Customizado',
+    label: 'Custom',
     emoji: '✏️',
-    description: 'Defina sua própria instrução de personalidade.',
+    description: 'Define your own personality instruction.',
     prompt: '',
   },
 ];
@@ -71,7 +71,7 @@ export default function Personality() {
           setCustomPrompt(data.prompt);
         }
       })
-      .catch(() => setFeedback({ type: 'error', text: 'Não foi possível carregar a personalidade atual.' }))
+      .catch(() => setFeedback({ type: 'error', text: 'Could not load the current personality.' }))
       .finally(() => setLoading(false));
   }, []);
 
@@ -99,9 +99,9 @@ export default function Personality() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setCurrentPrompt(prompt);
-      setFeedback({ type: 'success', text: 'Personalidade aplicada com sucesso!' });
+      setFeedback({ type: 'success', text: 'Personality applied successfully!' });
     } catch {
-      setFeedback({ type: 'error', text: 'Erro ao salvar. Verifique se o servidor está ativo.' });
+      setFeedback({ type: 'error', text: 'Failed to save. Make sure the server is running.' });
     } finally {
       setSaving(false);
     }
@@ -113,12 +113,12 @@ export default function Personality() {
   return (
     <div className="view">
       <div className="view__header">
-        <h1 className="view__title">Personalidade</h1>
-        <p className="view__subtitle">Escolha como o bot se comunica ao reescrever suas mensagens.</p>
+        <h1 className="view__title">Personality</h1>
+        <p className="view__subtitle">Choose how the bot communicates when rewriting your messages.</p>
       </div>
 
       {loading ? (
-        <p className="settings__loading">Carregando…</p>
+        <p className="settings__loading">Loading…</p>
       ) : (
         <div className="personality">
           <div className="personality__presets">
@@ -138,7 +138,7 @@ export default function Personality() {
 
           {selected === 'custom' && (
             <label className="field">
-              <span className="field__label">Instrução de personalidade</span>
+              <span className="field__label">Personality instruction</span>
               <textarea
                 className="field__textarea field__textarea--tall"
                 rows={6}
@@ -159,7 +159,7 @@ export default function Personality() {
             onClick={apply}
             disabled={saving || !activePrompt || !isDirty}
           >
-            {saving ? 'Aplicando…' : 'Aplicar personalidade'}
+            {saving ? 'Applying…' : 'Apply personality'}
           </button>
         </div>
       )}
