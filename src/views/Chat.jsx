@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { sendMessage } from '../api/chatApi.js';
+import { saveHistoryEntry } from '../api/historyApi.js';
 
-export default function Chat({ user }) {
+export default function Chat({ user, restoredContext, onNewEntry }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -9,6 +11,14 @@ export default function Chat({ user }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (!restoredContext) return;
+    setMessages([
+      { role: 'user', text: restoredContext.userMessage },
+      { role: 'bot', text: restoredContext.botResponse, model: restoredContext.model },
+    ]);
+  }, [restoredContext]);
 
   async function send() {
     const text = input.trim();
@@ -19,23 +29,12 @@ export default function Chat({ user }) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await sendMessage(text);
       const botMessage = { role: 'bot', text: data.response, model: data.model };
       setMessages(prev => [...prev, botMessage]);
 
       if (user) {
-        const token = sessionStorage.getItem('raptor_token');
-        fetch('/auth/history', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ userMessage: text, botResponse: data.response, model: data.model }),
-        }).catch(() => {});
+        saveHistoryEntry(text, data.response, data.model).then(() => onNewEntry?.()).catch(() => {});
       }
     } catch {
       setMessages(prev => [...prev, { role: 'bot', text: 'Failed to reach Raptor LLM.', error: true }]);

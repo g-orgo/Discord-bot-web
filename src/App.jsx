@@ -5,37 +5,47 @@ import Chat from './views/Chat';
 import Personality from './views/Playground';
 import Auth from './views/Auth';
 import History from './views/History';
+import { useAuth } from './hooks/useAuth.js';
+import { useHistory } from './hooks/useHistory.js';
 import './App.css';
 
-function getStoredUser() {
-  try {
-    const raw = sessionStorage.getItem('raptor_user');
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 export default function App() {
-  const [user, setUser] = useState(getStoredUser);
+  const { user, handleLogin, handleLogout } = useAuth();
+  const { recentHistory, refresh: refreshHistory, clear: clearRecentHistory } = useHistory(user);
+  const [restoredContext, setRestoredContext] = useState(null);
 
-  function handleLogin(userData) {
-    setUser(userData);
+  function onLogin(data) {
+    handleLogin(data);
+    refreshHistory();
   }
 
-  function handleLogout() {
-    sessionStorage.removeItem('raptor_token');
-    sessionStorage.removeItem('raptor_user');
-    setUser(null);
+  function onLogout() {
+    handleLogout();
+    clearRecentHistory();
+    setRestoredContext(null);
   }
 
   return (
     <BrowserRouter>
       <div className="layout">
-        <Nav user={user} onLogout={handleLogout} />
+        <Nav
+          user={user}
+          onLogout={onLogout}
+          recentHistory={recentHistory}
+          onRestoreHistory={entry => setRestoredContext(entry)}
+        />
         <main className="layout__main">
           <Routes>
-            <Route path="/" element={<Chat user={user} />} />
+            <Route
+              path="/"
+              element={
+                <Chat
+                  user={user}
+                  restoredContext={restoredContext}
+                  onNewEntry={refreshHistory}
+                />
+              }
+            />
             <Route
               path="/personality"
               element={user ? <Personality /> : <Navigate to="/auth" replace state={{ from: '/personality' }} />}
@@ -46,7 +56,7 @@ export default function App() {
             />
             <Route
               path="/auth"
-              element={user ? <Navigate to="/" replace /> : <Auth onLogin={handleLogin} />}
+              element={user ? <Navigate to="/" replace /> : <Auth onLogin={onLogin} />}
             />
           </Routes>
         </main>

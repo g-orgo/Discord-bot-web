@@ -1,20 +1,14 @@
 import { useState, useEffect } from 'react';
+import { fetchHistory, clearHistory as clearHistoryApi } from '../api/historyApi.js';
 
 export default function History() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
 
-  function getToken() {
-    return sessionStorage.getItem('raptor_token');
-  }
-
   useEffect(() => {
-    fetch('/auth/history', {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    })
-      .then(r => r.json())
-      .then(data => setEntries(Array.isArray(data) ? data.slice().reverse() : []))
+    fetchHistory()
+      .then(data => setEntries(Array.isArray(data) ? data : []))
       .catch(() => setEntries([]))
       .finally(() => setLoading(false));
   }, []);
@@ -23,10 +17,7 @@ export default function History() {
     if (!window.confirm('Limpar todo o histórico? Esta ação não pode ser desfeita.')) return;
     setClearing(true);
     try {
-      await fetch('/auth/history', {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      await clearHistoryApi();
       setEntries([]);
     } finally {
       setClearing(false);

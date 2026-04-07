@@ -1,10 +1,5 @@
 import { useState } from 'react';
-
-function saveSession(data, onLogin) {
-  sessionStorage.setItem('raptor_token', data.token);
-  sessionStorage.setItem('raptor_user', JSON.stringify({ email: data.email, displayName: data.displayName }));
-  onLogin?.({ email: data.email, displayName: data.displayName });
-}
+import { login, register } from '../api/authApi.js';
 
 function LoginForm({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -18,14 +13,8 @@ function LoginForm({ onLogin }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      saveSession(data, onLogin);
+      const data = await login(email, password);
+      onLogin?.(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -89,14 +78,8 @@ function RegisterForm({ onLogin }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password, displayName: displayName.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      saveSession(data, onLogin);
+      const data = await register(email, password, displayName.trim());
+      onLogin?.(data);
     } catch (err) {
       setError(err.message);
     } finally {
