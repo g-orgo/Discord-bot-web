@@ -71,7 +71,10 @@ export default function Personality() {
           setCustomPrompt(data.prompt);
         }
       })
-      .catch(() => setFeedback({ type: 'error', text: 'Could not load the current personality.' }))
+      .catch(err => {
+        console.error('[Personality] Failed to load system prompt:', err);
+        setFeedback({ type: 'error', text: 'Could not load the current personality.' });
+      })
       .finally(() => setLoading(false));
   }, []);
 

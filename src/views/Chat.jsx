@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { sendMessage } from '../api/chatApi.js';
+import { sendMessageStream } from '../api/chatApi.js';
 import { saveHistoryEntry } from '../api/historyApi.js';
 
 export default function Chat({ user, restoredContext, onNewEntry }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -22,24 +23,50 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
 
   async function send() {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || streaming) return;
 
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text }]);
     setLoading(true);
 
-    try {
-      const data = await sendMessage(text);
-      const botMessage = { role: 'bot', text: data.response, model: data.model };
-      setMessages(prev => [...prev, botMessage]);
+    let fullText = '';
+    let firstToken = true;
 
-      if (user) {
-        saveHistoryEntry(text, data.response, data.model).then(() => onNewEntry?.()).catch(() => {});
-      }
+    try {
+      await sendMessageStream(
+        text,
+        (token) => {
+          fullText += token;
+          if (firstToken) {
+            firstToken = false;
+            setLoading(false);
+            setStreaming(true);
+            setMessages(prev => [...prev, { role: 'bot', text: fullText }]);
+          } else {
+            setMessages(prev => {
+              const updated = [...prev];
+              updated[updated.length - 1] = { role: 'bot', text: fullText };
+              return updated;
+            });
+          }
+        },
+        (model) => {
+          setStreaming(false);
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: 'bot', text: fullText, model };
+            return updated;
+          });
+          if (user) {
+            saveHistoryEntry(text, fullText, model).then(() => onNewEntry?.()).catch(() => {});
+          }
+        }
+      );
     } catch {
       setMessages(prev => [...prev, { role: 'bot', text: 'Failed to reach Raptor LLM.', error: true }]);
     } finally {
       setLoading(false);
+      setStreaming(false);
     }
   }
 
@@ -92,9 +119,9 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          disabled={loading}
+          disabled={loading || streaming}
         />
-        <button className="chat__send" type="submit" disabled={loading || !input.trim()}>
+        <button className="chat__send" type="submit" disabled={loading || streaming || !input.trim()}>
           ↑
         </button>
       </form>

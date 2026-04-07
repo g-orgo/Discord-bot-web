@@ -10,7 +10,10 @@ export default function History({ user }) {
   const load = useCallback(() => {
     fetchHistory()
       .then(data => setEntries(Array.isArray(data) ? data : []))
-      .catch(() => setEntries([]))
+      .catch(err => {
+        console.error('[History] Failed to fetch history:', err);
+        setEntries([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

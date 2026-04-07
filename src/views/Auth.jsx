@@ -92,7 +92,7 @@ function RegisterForm({ onLogin }) {
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <label className="field">
-        <span className="field__label">Nome</span>
+        <span className="field__label">Name</span>
         <input
           className="field__input"
           type="text"
