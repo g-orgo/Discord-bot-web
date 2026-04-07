@@ -55,6 +55,15 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
       <div className="view__header">
         <h1 className="view__title">Chat</h1>
         <p className="view__subtitle">Messages are rewritten by the AI using the active system prompt.</p>
+        {messages.length > 0 && (
+          <button
+            type="button"
+            className="chat__new"
+            onClick={() => setMessages([])}
+          >
+            Novo chat
+          </button>
+        )}
       </div>
 
       <div className="chat__messages">
