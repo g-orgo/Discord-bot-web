@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const NAV_LINKS = [
   { to: '/', label: 'Chat', icon: '💬' },
   { to: '/personality', label: 'Personalidade', icon: '🎭' },
+  { to: '/history', label: 'Histórico', icon: '📋' },
 ];
 
 export default function Nav({ user, onLogout }) {

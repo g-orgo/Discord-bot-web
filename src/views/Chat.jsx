@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-export default function Chat() {
+export default function Chat({ user }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,17 @@ export default function Chat() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'bot', text: data.response, model: data.model }]);
+      const botMessage = { role: 'bot', text: data.response, model: data.model };
+      setMessages(prev => [...prev, botMessage]);
+
+      if (user) {
+        const token = sessionStorage.getItem('raptor_token');
+        fetch('/auth/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ userMessage: text, botResponse: data.response, model: data.model }),
+        }).catch(() => {});
+      }
     } catch {
       setMessages(prev => [...prev, { role: 'bot', text: 'Failed to reach Raptor LLM.', error: true }]);
     } finally {

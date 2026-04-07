@@ -4,6 +4,7 @@ import Nav from './components/Nav';
 import Chat from './views/Chat';
 import Personality from './views/Playground';
 import Auth from './views/Auth';
+import History from './views/History';
 import './App.css';
 
 function getStoredUser() {
@@ -34,10 +35,14 @@ export default function App() {
         <Nav user={user} onLogout={handleLogout} />
         <main className="layout__main">
           <Routes>
-            <Route path="/" element={<Chat />} />
+            <Route path="/" element={<Chat user={user} />} />
             <Route
               path="/personality"
               element={user ? <Personality /> : <Navigate to="/auth" replace state={{ from: '/personality' }} />}
+            />
+            <Route
+              path="/history"
+              element={user ? <History /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
             />
             <Route
               path="/auth"
