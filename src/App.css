@@ -504,6 +504,17 @@
   color: #a8c7fa;
 }
 
+.history__source {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.history__source--discord {
+  background: #2b2d42;
+  color: #7289da;
+}
+
 .history__user,
 .history__bot {
   display: flex;

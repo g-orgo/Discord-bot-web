@@ -12,6 +12,12 @@ export default defineConfig({
       },
       '/auth': {
         target: 'http://localhost:3001',
+        configure: (proxy) => {
+          // Disable response buffering for SSE
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['x-accel-buffering'] = 'no';
+          });
+        },
       },
     },
   },

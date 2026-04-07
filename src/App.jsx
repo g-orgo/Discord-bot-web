@@ -8,12 +8,15 @@ import History from './views/History';
 import Profile from './views/Profile';
 import { useAuth } from './hooks/useAuth.js';
 import { useHistory } from './hooks/useHistory.js';
+import { useHistoryStream } from './hooks/useHistoryStream.js';
 import './App.css';
 
 export default function App() {
   const { user, handleLogin, handleLogout, updateDiscord } = useAuth();
   const { recentHistory, refresh: refreshHistory, clear: clearRecentHistory } = useHistory(user);
   const [restoredContext, setRestoredContext] = useState(null);
+
+  useHistoryStream(user, refreshHistory);
 
   function onLogin(data) {
     handleLogin(data);
@@ -53,7 +56,7 @@ export default function App() {
             />
             <Route
               path="/history"
-              element={user ? <History /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
+              element={user ? <History user={user} /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
             />
             <Route
               path="/profile"

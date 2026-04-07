@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { fetchHistory } from '../api/historyApi.js';
 
 export function useHistory(user) {
@@ -14,6 +14,10 @@ export function useHistory(user) {
       // silent — sidebar history is non-critical
     }
   }, []);
+
+  useEffect(() => {
+    if (user) refresh();
+  }, [user, refresh]);
 
   function clear() {
     setRecentHistory([]);

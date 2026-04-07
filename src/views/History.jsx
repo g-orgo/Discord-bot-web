@@ -1,17 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchHistory, clearHistory as clearHistoryApi } from '../api/historyApi.js';
+import { useHistoryStream } from '../hooks/useHistoryStream.js';
 
-export default function History() {
+export default function History({ user }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     fetchHistory()
       .then(data => setEntries(Array.isArray(data) ? data : []))
       .catch(() => setEntries([]))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  useHistoryStream(user, load);
 
   async function clearHistory() {
     if (!window.confirm('Clear all history? This action cannot be undone.')) return;
@@ -55,6 +60,7 @@ export default function History() {
             <div className="history__meta">
               <span className="history__date">{formatDate(entry.timestamp)}</span>
               {entry.model && <span className="history__model">{entry.model}</span>}
+              {entry.source === 'discord' && <span className="history__source history__source--discord">🎮 Discord</span>}
             </div>
             <div className="history__user">
               <span className="history__label">You</span>
