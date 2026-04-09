@@ -1,16 +1,76 @@
-# React + Vite
+# Raptor Chatbot Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web frontend for the Raptor Chatbot. Provides a chat interface powered by a local LLM, a personality editor for customising the AI system prompt, and user authentication with persistent chat history.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+React 19 · Vite · react-router-dom
 
-## React Compiler
+## Commands
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install       # Install dependencies
+npm run dev       # Start Vite dev server → http://localhost:5173
+npm run build     # Production build → dist/
+npm run preview   # Serve production build locally
+npm run lint      # ESLint
+```
 
-## Expanding the ESLint configuration
+## Local development setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Both backend services must be running before starting the frontend:
+
+| Service | Command | Port |
+|---------|---------|------|
+| `raptor-chatbot-llm` | `uvicorn main:app --reload` | 8000 |
+| `raptor-chatbot-server` | `npm run dev` | 3001 |
+
+The Vite dev server proxies API calls automatically — no `.env` required:
+
+| Prefix | Proxied to |
+|--------|-----------|
+| `/api/*` | `http://localhost:8000` (LLM server) |
+| `/auth/*` | `http://localhost:3001` (Auth server) |
+
+## Routes
+
+| Path | View | Auth required |
+|------|------|---------------|
+| `/` | Chat | No |
+| `/personality` | Personality editor | Yes — redirects to `/auth` |
+| `/auth` | Login / Register | No — redirects to `/` if already logged in |
+
+## Features
+
+- **Chat** — streams responses from the LLM via SSE (`POST /api/chat/stream`)
+- **Personality editor** — preset cards + custom prompt editor, persisted to `PUT /api/system-prompt`
+- **Auth** — login and register with JWT sessions stored in `sessionStorage`
+- **History** — chat history synced with the auth server, updated in real time via SSE
+
+## Architecture
+
+React 19 SPA with no external state management library (`useState` only). Client-side routing via `react-router-dom`.
+
+```
+src/
+  App.jsx            # Root — BrowserRouter, route definitions, session state
+  App.css            # All styles (no CSS modules, no Tailwind)
+  index.css          # Body/root resets only
+  components/
+    Nav.jsx          # Sidebar (desktop) / bottom bar (mobile)
+  views/
+    Chat.jsx         # LLM chat interface
+    Playground.jsx   # Personality / system prompt editor
+    Auth.jsx         # Login + Register tabs
+```
+
+**Session management:** Auth state is held in React state (`App.jsx`) and persisted to `sessionStorage`:
+- `raptor_token` — Bearer JWT
+- `raptor_user` — `{ email, displayName }` JSON string
+
+Session is lost on tab close (intentional — `sessionStorage`).
+
+## Related services
+
+- [`raptor-chatbot-llm`](https://github.com/g-orgo/Discord-bot-LLM) — LLM server (chat, streaming, system prompt)
+- [`raptor-chatbot-server`](https://github.com/g-orgo/Discord-bot-web-server) — Auth & history server
