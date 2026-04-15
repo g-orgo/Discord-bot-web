@@ -69,7 +69,6 @@ export default function History({ user, onRestoreHistory }) {
           <li key={i} className="history__entry">
             <div className="history__meta">
               <span className="history__date">{formatDate(entry.timestamp)}</span>
-              {entry.model && <span className="history__model">{entry.model}</span>}
               {entry.source === 'discord' && <span className="history__source history__source--discord">🎮 Discord</span>}
               {onRestoreHistory && (
                 <button

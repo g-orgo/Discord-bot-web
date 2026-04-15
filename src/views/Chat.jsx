@@ -100,7 +100,6 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
         {messages.map((m, i) => (
           <div key={i} className={`msg msg--${m.role}${m.error ? ' msg--error' : ''}`}>
             <div className="msg__text">{m.text}</div>
-            {m.model && <div className="msg__meta">{m.model}</div>}
           </div>
         ))}
         {loading && (
