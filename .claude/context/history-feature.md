@@ -39,6 +39,30 @@ Added "Open in Chat" restore button to the History view so users can resume any 
 - Navigation to `/` is handled inside `History.jsx` via `useNavigate` — keeps restore logic self-contained.
 - Style is ghost (transparent bg, subtle border) to not compete visually with the date/model metadata.
 
+## Update — 2026-04-15 (session tracking)
+
+### Summary
+Introduced `sessionId` so that multiple exchanges in the same conversation are linked. Restoring a session from History or the nav sidebar now replays the full conversation thread in Chat. New messages continue under the same session.
+
+### Files modified
+| File | Change |
+|---|---|
+| `raptor-chatbot-server/src/models/HistoryEntry.js` | Added `sessionId: String` (optional, indexed) |
+| `raptor-chatbot-server/src/routes/history.js` | GET exposes `sessionId`; POST accepts and stores it |
+| `raptor-chatbot-web/src/utils/sessions.js` | New utility — `groupBySessions` and `latestEntry` |
+| `raptor-chatbot-web/src/api/historyApi.js` | `saveHistoryEntry` forwards `sessionId` param |
+| `raptor-chatbot-web/src/hooks/useHistory.js` | Returns grouped sessions (max 3) instead of flat entries |
+| `raptor-chatbot-web/src/components/Nav.jsx` | Uses session objects; shows exchange count badge |
+| `raptor-chatbot-web/src/views/Chat.jsx` | `sessionIdRef` tracks current UUID; restores full session; resets on New Chat |
+| `raptor-chatbot-web/src/App.jsx` | `restoredSession` replaces `restoredContext`; shape is `{ sessionId, entries }` |
+| `raptor-chatbot-web/src/views/History.jsx` | Groups by session; threads multi-exchange sessions; Open in Chat passes full session |
+| `raptor-chatbot-web/src/App.css` | `.history__exchange`, `.history__exchanges-count`, `.nav__dropdown-count` |
+
+### Decisions made
+- Discord entries have no `sessionId` (null) — each is its own standalone session. "Open in Chat" button is hidden for Discord entries.
+- Old web entries (pre-feature) also have no `sessionId` — each shows as a standalone session with no visual change.
+- `groupBySessions` extracted as a shared utility to avoid duplication between `useHistory` and `History.jsx`.
+- `sessionIdRef` (not state) in Chat to avoid re-renders; reset on "New Chat" and on session restore.
+
 ## Known issues / next steps
-- History resets on server restart (in-memory only).
 - No pagination — could grow large for active users.
