@@ -56,7 +56,7 @@ export default function App() {
             />
             <Route
               path="/history"
-              element={user ? <History user={user} /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
+              element={user ? <History user={user} onRestoreHistory={entry => setRestoredContext(entry)} /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
             />
             <Route
               path="/profile"

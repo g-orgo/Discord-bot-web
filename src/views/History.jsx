@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchHistory, clearHistory as clearHistoryApi } from '../api/historyApi.js';
 import { useHistoryStream } from '../hooks/useHistoryStream.js';
 
-export default function History({ user }) {
+export default function History({ user, onRestoreHistory }) {
+  const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
@@ -30,6 +32,11 @@ export default function History({ user }) {
     } finally {
       setClearing(false);
     }
+  }
+
+  function restoreEntry(entry) {
+    onRestoreHistory(entry);
+    navigate('/');
   }
 
   function formatDate(iso) {
@@ -64,6 +71,15 @@ export default function History({ user }) {
               <span className="history__date">{formatDate(entry.timestamp)}</span>
               {entry.model && <span className="history__model">{entry.model}</span>}
               {entry.source === 'discord' && <span className="history__source history__source--discord">🎮 Discord</span>}
+              {onRestoreHistory && (
+                <button
+                  type="button"
+                  className="history__restore"
+                  onClick={() => restoreEntry(entry)}
+                >
+                  💬 Open in Chat
+                </button>
+              )}
             </div>
             <div className="history__user">
               <span className="history__label">You</span>

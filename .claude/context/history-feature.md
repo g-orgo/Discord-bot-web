@@ -22,6 +22,23 @@ Added a translation history feature for logged-in users. Each chat interaction i
 - **Reverse chronological order**: newest entries shown first by calling `.slice().reverse()` client-side after fetch.
 - **Auth-links separate array in Nav**: keeps base links always visible while auth-only links are conditionally rendered, avoiding ternaries inside the map.
 
+## Update — 2026-04-15
+
+### Summary
+Added "Open in Chat" restore button to the History view so users can resume any past session directly from the `/history` page (previously only possible via the sidebar dropdown).
+
+### Files modified
+| File | Change |
+|---|---|
+| `raptor-chatbot-web/src/views/History.jsx` | Accepts `onRestoreHistory` prop; added `useNavigate`; added `restoreEntry()` function; renders `💬 Open in Chat` button per entry in `.history__meta` (only when prop is provided) |
+| `raptor-chatbot-web/src/App.jsx` | Passes `onRestoreHistory={entry => setRestoredContext(entry)}` to `<History>` |
+| `raptor-chatbot-web/src/App.css` | Added `.history__restore` button styles (ghost style, hover highlight) |
+
+### Decisions made
+- Button is guarded by `onRestoreHistory && (...)` so the component stays usable standalone without the prop.
+- Navigation to `/` is handled inside `History.jsx` via `useNavigate` — keeps restore logic self-contained.
+- Style is ghost (transparent bg, subtle border) to not compete visually with the date/model metadata.
+
 ## Known issues / next steps
 - History resets on server restart (in-memory only).
 - No pagination — could grow large for active users.

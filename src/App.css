@@ -515,6 +515,22 @@
   color: #7289da;
 }
 
+.history__restore {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid #1e2d50;
+  border-radius: 8px;
+  color: #a8c7fa;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.history__restore:hover {
+  background: #1a2845;
+  border-color: #a8c7fa;
+}
+
 .history__user,
 .history__bot {
   display: flex;
