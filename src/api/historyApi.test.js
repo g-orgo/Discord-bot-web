@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { saveHistoryEntry } from './historyApi.js';
+import { saveHistoryEntry, deleteSession, deleteEntry } from './historyApi.js';
 
 beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: true })));
@@ -32,6 +32,28 @@ describe('saveHistoryEntry', () => {
     await saveHistoryEntry('hello', 'hi', null, 'session-uuid');
 
     const [, options] = fetch.mock.calls[0];
+    expect(options.headers['Authorization']).toBe('Bearer mock-token');
+  });
+});
+
+describe('deleteSession', () => {
+  it('sends DELETE to /auth/history/session/:sessionId', async () => {
+    await deleteSession('my-session-id');
+
+    const [url, options] = fetch.mock.calls[0];
+    expect(url).toContain('/auth/history/session/my-session-id');
+    expect(options.method).toBe('DELETE');
+    expect(options.headers['Authorization']).toBe('Bearer mock-token');
+  });
+});
+
+describe('deleteEntry', () => {
+  it('sends DELETE to /auth/history/entry/:id', async () => {
+    await deleteEntry('entry-abc');
+
+    const [url, options] = fetch.mock.calls[0];
+    expect(url).toContain('/auth/history/entry/entry-abc');
+    expect(options.method).toBe('DELETE');
     expect(options.headers['Authorization']).toBe('Bearer mock-token');
   });
 });

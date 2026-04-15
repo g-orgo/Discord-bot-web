@@ -26,6 +26,20 @@ export async function patchSessionId(id, sessionId) {
   });
 }
 
+export async function deleteSession(sessionId) {
+  return fetch(`/auth/history/session/${encodeURIComponent(sessionId)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+}
+
+export async function deleteEntry(id) {
+  return fetch(`/auth/history/entry/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+}
+
 export async function clearHistory() {
   return fetch('/auth/history', {
     method: 'DELETE',

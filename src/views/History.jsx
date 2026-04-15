@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchHistory, clearHistory as clearHistoryApi } from '../api/historyApi.js';
+import { fetchHistory, clearHistory as clearHistoryApi, deleteSession, deleteEntry } from '../api/historyApi.js';
 import { useHistoryStream } from '../hooks/useHistoryStream.js';
 import { groupBySessions, latestEntry } from '../utils/sessions.js';
 
@@ -9,6 +9,7 @@ export default function History({ user, onRestoreHistory }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
+  const [deletingIdx, setDeletingIdx] = useState(null);
 
   const load = useCallback(() => {
     fetchHistory()
@@ -32,6 +33,22 @@ export default function History({ user, onRestoreHistory }) {
       setSessions([]);
     } finally {
       setClearing(false);
+    }
+  }
+
+  async function deleteSessionItem(session, index) {
+    setDeletingIdx(index);
+    try {
+      if (session.sessionId) {
+        await deleteSession(session.sessionId);
+      } else {
+        await deleteEntry(session.entries[0].id);
+      }
+      setSessions(prev => prev.filter((_, i) => i !== index));
+    } catch {
+      // silent — list stays intact on failure
+    } finally {
+      setDeletingIdx(null);
     }
   }
 
@@ -68,6 +85,7 @@ export default function History({ user, onRestoreHistory }) {
       <ul className="history__list">
         {sessions.map((session, si) => {
           const last = latestEntry(session);
+          const isDeleting = deletingIdx === si;
           return (
             <li key={si} className="history__entry">
               <div className="history__meta">
@@ -80,29 +98,29 @@ export default function History({ user, onRestoreHistory }) {
                 {last.source === 'discord' && (
                   <span className="history__source history__source--discord">🎮 Discord</span>
                 )}
-                {onRestoreHistory && last.source !== 'discord' && (
+                <div className="history__actions">
+                  {onRestoreHistory && last.source !== 'discord' && (
+                    <button
+                      type="button"
+                      className="history__restore"
+                      onClick={() => restoreSession(session)}
+                      disabled={isDeleting}
+                    >
+                      💬 Open in Chat
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className="history__restore"
-                    onClick={() => restoreSession(session)}
+                    className="history__delete"
+                    onClick={() => deleteSessionItem(session, si)}
+                    disabled={isDeleting}
+                    aria-label="Delete session"
                   >
-                    💬 Open in Chat
+                    {isDeleting ? '…' : '🗑'}
                   </button>
-                )}
-              </div>
-
-              {session.entries.map((entry, ei) => (
-                <div key={ei} className="history__exchange">
-                  <div className="history__user">
-                    <span className="history__label">You</span>
-                    <p className="history__text">{entry.userMessage}</p>
-                  </div>
-                  <div className="history__bot">
-                    <span className="history__label">Raptor</span>
-                    <p className="history__text">{entry.botResponse}</p>
-                  </div>
                 </div>
-              ))}
+              </div>
+              <p className="history__preview">{last.userMessage}</p>
             </li>
           );
         })}
