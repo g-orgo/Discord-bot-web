@@ -2,19 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchHistory, clearHistory as clearHistoryApi } from '../api/historyApi.js';
 import { useHistoryStream } from '../hooks/useHistoryStream.js';
+import { groupBySessions, latestEntry } from '../utils/sessions.js';
 
 export default function History({ user, onRestoreHistory }) {
   const navigate = useNavigate();
-  const [entries, setEntries] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
 
   const load = useCallback(() => {
     fetchHistory()
-      .then(data => setEntries(Array.isArray(data) ? data : []))
+      .then(data => setSessions(groupBySessions(Array.isArray(data) ? data : [])))
       .catch(err => {
         console.error('[History] Failed to fetch history:', err);
-        setEntries([]);
+        setSessions([]);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -28,14 +29,14 @@ export default function History({ user, onRestoreHistory }) {
     setClearing(true);
     try {
       await clearHistoryApi();
-      setEntries([]);
+      setSessions([]);
     } finally {
       setClearing(false);
     }
   }
 
-  function restoreEntry(entry) {
-    onRestoreHistory(entry);
+  function restoreSession(session) {
+    onRestoreHistory(session);
     navigate('/');
   }
 
@@ -51,7 +52,7 @@ export default function History({ user, onRestoreHistory }) {
       <div className="view__header">
         <h1 className="view__title">History</h1>
         <p className="view__subtitle">Your latest interactions with Raptor LLM.</p>
-        {entries.length > 0 && (
+        {sessions.length > 0 && (
           <button className="history__clear" onClick={clearHistory} disabled={clearing} type="button">
             {clearing ? 'Clearing…' : 'Clear history'}
           </button>
@@ -60,36 +61,51 @@ export default function History({ user, onRestoreHistory }) {
 
       {loading && <p className="history__empty">Loading…</p>}
 
-      {!loading && entries.length === 0 && (
+      {!loading && sessions.length === 0 && (
         <p className="history__empty">No interactions yet. Send a message in Chat!</p>
       )}
 
       <ul className="history__list">
-        {entries.map((entry, i) => (
-          <li key={i} className="history__entry">
-            <div className="history__meta">
-              <span className="history__date">{formatDate(entry.timestamp)}</span>
-              {entry.source === 'discord' && <span className="history__source history__source--discord">🎮 Discord</span>}
-              {onRestoreHistory && (
-                <button
-                  type="button"
-                  className="history__restore"
-                  onClick={() => restoreEntry(entry)}
-                >
-                  💬 Open in Chat
-                </button>
-              )}
-            </div>
-            <div className="history__user">
-              <span className="history__label">You</span>
-              <p className="history__text">{entry.userMessage}</p>
-            </div>
-            <div className="history__bot">
-              <span className="history__label">Raptor</span>
-              <p className="history__text">{entry.botResponse}</p>
-            </div>
-          </li>
-        ))}
+        {sessions.map((session, si) => {
+          const last = latestEntry(session);
+          return (
+            <li key={si} className="history__entry">
+              <div className="history__meta">
+                <span className="history__date">{formatDate(last.timestamp)}</span>
+                {session.entries.length > 1 && (
+                  <span className="history__exchanges-count">
+                    {session.entries.length} exchanges
+                  </span>
+                )}
+                {last.source === 'discord' && (
+                  <span className="history__source history__source--discord">🎮 Discord</span>
+                )}
+                {onRestoreHistory && last.source !== 'discord' && (
+                  <button
+                    type="button"
+                    className="history__restore"
+                    onClick={() => restoreSession(session)}
+                  >
+                    💬 Open in Chat
+                  </button>
+                )}
+              </div>
+
+              {session.entries.map((entry, ei) => (
+                <div key={ei} className="history__exchange">
+                  <div className="history__user">
+                    <span className="history__label">You</span>
+                    <p className="history__text">{entry.userMessage}</p>
+                  </div>
+                  <div className="history__bot">
+                    <span className="history__label">Raptor</span>
+                    <p className="history__text">{entry.botResponse}</p>
+                  </div>
+                </div>
+              ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { fetchHistory } from '../api/historyApi.js';
+import { groupBySessions } from '../utils/sessions.js';
 
 export function useHistory(user) {
   const [recentHistory, setRecentHistory] = useState([]);
@@ -9,7 +10,8 @@ export function useHistory(user) {
     if (!token) return;
     try {
       const data = await fetchHistory();
-      setRecentHistory(Array.isArray(data) ? data.slice(0, 3) : []);
+      const sessions = groupBySessions(Array.isArray(data) ? data : []);
+      setRecentHistory(sessions.slice(0, 3));
     } catch {
       // silent — sidebar history is non-critical
     }

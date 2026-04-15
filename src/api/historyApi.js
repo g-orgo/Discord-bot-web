@@ -10,11 +10,11 @@ export async function fetchHistory() {
   return res.json();
 }
 
-export async function saveHistoryEntry(userMessage, botResponse, model) {
+export async function saveHistoryEntry(userMessage, botResponse, model, sessionId) {
   return fetch('/auth/history', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-    body: JSON.stringify({ userMessage, botResponse, model }),
+    body: JSON.stringify({ userMessage, botResponse, model, sessionId }),
   });
 }
 

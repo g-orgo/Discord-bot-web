@@ -531,6 +531,39 @@
   border-color: #a8c7fa;
 }
 
+.history__exchanges-count {
+  font-size: 0.72rem;
+  background: #0d2040;
+  color: #7af4b8;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.history__exchange {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history__exchange + .history__exchange {
+  border-top: 1px solid #1e2d50;
+  padding-top: 12px;
+}
+
+.nav__dropdown-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  background: #0d2040;
+  color: #7af4b8;
+  font-size: 0.65rem;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+}
+
 .history__user,
 .history__bot {
   display: flex;

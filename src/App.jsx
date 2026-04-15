@@ -14,7 +14,7 @@ import './App.css';
 export default function App() {
   const { user, handleLogin, handleLogout, updateDiscord } = useAuth();
   const { recentHistory, refresh: refreshHistory, clear: clearRecentHistory } = useHistory(user);
-  const [restoredContext, setRestoredContext] = useState(null);
+  const [restoredSession, setRestoredSession] = useState(null);
 
   useHistoryStream(user, refreshHistory);
 
@@ -26,7 +26,7 @@ export default function App() {
   function onLogout() {
     handleLogout();
     clearRecentHistory();
-    setRestoredContext(null);
+    setRestoredSession(null);
   }
 
   return (
@@ -36,7 +36,7 @@ export default function App() {
           user={user}
           onLogout={onLogout}
           recentHistory={recentHistory}
-          onRestoreHistory={entry => setRestoredContext(entry)}
+          onRestoreHistory={session => setRestoredSession(session)}
         />
         <main className="layout__main">
           <Routes>
@@ -45,7 +45,7 @@ export default function App() {
               element={
                 <Chat
                   user={user}
-                  restoredContext={restoredContext}
+                  restoredSession={restoredSession}
                   onNewEntry={refreshHistory}
                 />
               }
@@ -56,7 +56,7 @@ export default function App() {
             />
             <Route
               path="/history"
-              element={user ? <History user={user} onRestoreHistory={entry => setRestoredContext(entry)} /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
+              element={user ? <History user={user} onRestoreHistory={session => setRestoredSession(session)} /> : <Navigate to="/auth" replace state={{ from: '/history' }} />}
             />
             <Route
               path="/profile"

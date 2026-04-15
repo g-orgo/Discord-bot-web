@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { sendMessageStream } from '../api/chatApi.js';
 import { saveHistoryEntry } from '../api/historyApi.js';
 
-export default function Chat({ user, restoredContext, onNewEntry }) {
+export default function Chat({ user, restoredSession, onNewEntry }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
+  const sessionIdRef = useRef(crypto.randomUUID());
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -14,12 +15,15 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
   }, [messages]);
 
   useEffect(() => {
-    if (!restoredContext) return;
-    setMessages([
-      { role: 'user', text: restoredContext.userMessage },
-      { role: 'bot', text: restoredContext.botResponse, model: restoredContext.model },
-    ]);
-  }, [restoredContext]);
+    if (!restoredSession) return;
+    sessionIdRef.current = restoredSession.sessionId ?? crypto.randomUUID();
+    const restored = [];
+    for (const entry of restoredSession.entries) {
+      restored.push({ role: 'user', text: entry.userMessage });
+      restored.push({ role: 'bot', text: entry.botResponse });
+    }
+    setMessages(restored);
+  }, [restoredSession]);
 
   async function send() {
     const text = input.trim();
@@ -58,7 +62,7 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
             return updated;
           });
           if (user) {
-            saveHistoryEntry(text, fullText, model).then(() => onNewEntry?.()).catch(() => {});
+            saveHistoryEntry(text, fullText, model, sessionIdRef.current).then(() => onNewEntry?.()).catch(() => {});
           }
         }
       );
@@ -86,7 +90,7 @@ export default function Chat({ user, restoredContext, onNewEntry }) {
           <button
             type="button"
             className="chat__new"
-            onClick={() => setMessages([])}
+            onClick={() => { setMessages([]); sessionIdRef.current = crypto.randomUUID(); }}
           >
             New chat
           </button>

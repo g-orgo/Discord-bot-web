@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { latestEntry } from '../utils/sessions.js';
 
 const BASE_LINKS = [
   { to: '/', label: 'Chat', icon: '💬' },
@@ -60,18 +61,24 @@ export default function Nav({ user, onLogout, recentHistory, onRestoreHistory })
 
           {user && historyOpen && recentHistory.length > 0 && (
             <ul className="nav__dropdown-list">
-              {recentHistory.map((entry, i) => (
-                <li key={i}>
-                  <button
-                    type="button"
-                    className="nav__dropdown-entry"
-                    onClick={() => handleRestore(entry)}
-                    title={entry.userMessage}
-                  >
-                    {truncate(entry.userMessage)}
-                  </button>
-                </li>
-              ))}
+              {recentHistory.map((session, i) => {
+                const preview = latestEntry(session);
+                return (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      className="nav__dropdown-entry"
+                      onClick={() => handleRestore(session)}
+                      title={preview.userMessage}
+                    >
+                      {truncate(preview.userMessage)}
+                      {session.entries.length > 1 && (
+                        <span className="nav__dropdown-count">{session.entries.length}</span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </li>
