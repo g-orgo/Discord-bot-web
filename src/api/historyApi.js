@@ -18,6 +18,14 @@ export async function saveHistoryEntry(userMessage, botResponse, model, sessionI
   });
 }
 
+export async function patchSessionId(id, sessionId) {
+  return fetch(`/auth/history/${id}/session`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify({ sessionId }),
+  });
+}
+
 export async function clearHistory() {
   return fetch('/auth/history', {
     method: 'DELETE',

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { sendMessageStream } from '../api/chatApi.js';
-import { saveHistoryEntry } from '../api/historyApi.js';
+import { saveHistoryEntry, patchSessionId } from '../api/historyApi.js';
 
 export default function Chat({ user, restoredSession, onNewEntry }) {
   const [messages, setMessages] = useState([]);
@@ -16,7 +16,18 @@ export default function Chat({ user, restoredSession, onNewEntry }) {
 
   useEffect(() => {
     if (!restoredSession) return;
-    sessionIdRef.current = restoredSession.sessionId ?? crypto.randomUUID();
+
+    if (restoredSession.sessionId) {
+      sessionIdRef.current = restoredSession.sessionId;
+    } else {
+      // Legacy entries have no sessionId — generate one and backfill all entries in the session
+      const newId = crypto.randomUUID();
+      sessionIdRef.current = newId;
+      restoredSession.entries
+        .filter(e => e.id)
+        .forEach(e => patchSessionId(e.id, newId).catch(() => {}));
+    }
+
     const restored = [];
     for (const entry of restoredSession.entries) {
       restored.push({ role: 'user', text: entry.userMessage });

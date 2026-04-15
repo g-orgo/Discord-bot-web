@@ -1,0 +1,37 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { saveHistoryEntry } from './historyApi.js';
+
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: true })));
+  vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('mock-token');
+});
+
+describe('saveHistoryEntry', () => {
+  it('sends userMessage, botResponse, model and sessionId in the POST body', async () => {
+    await saveHistoryEntry('hello', 'hi', 'llama3', 'session-uuid');
+
+    expect(fetch).toHaveBeenCalledOnce();
+    const [, options] = fetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+
+    expect(body.userMessage).toBe('hello');
+    expect(body.botResponse).toBe('hi');
+    expect(body.model).toBe('llama3');
+    expect(body.sessionId).toBe('session-uuid');
+  });
+
+  it('sends sessionId as null when not provided', async () => {
+    await saveHistoryEntry('hello', 'hi', 'llama3');
+
+    const [, options] = fetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(body.sessionId).toBeUndefined(); // caller omits it; server treats missing as null
+  });
+
+  it('includes Authorization header with Bearer token', async () => {
+    await saveHistoryEntry('hello', 'hi', null, 'session-uuid');
+
+    const [, options] = fetch.mock.calls[0];
+    expect(options.headers['Authorization']).toBe('Bearer mock-token');
+  });
+});
