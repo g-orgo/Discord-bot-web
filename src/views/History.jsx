@@ -79,7 +79,7 @@ export default function History({ user, onRestoreHistory }) {
       {loading && <p className="history__empty">Loading…</p>}
 
       {!loading && sessions.length === 0 && (
-        <p className="history__empty">No interactions yet. Send a message in Chat!</p>
+        <p className="history__empty">No history yet. Start chatting!</p>
       )}
 
       <ul className="history__list">
