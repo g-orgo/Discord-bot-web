@@ -75,6 +75,10 @@ export default function Chat({ user, restoredSession, onNewEntry }) {
           if (user) {
             saveHistoryEntry(text, fullText, model, sessionIdRef.current).then(() => onNewEntry?.()).catch(() => {});
           }
+        },
+        () => {
+          setLoading(false);
+          setStreaming(false);
         }
       );
     } catch {
