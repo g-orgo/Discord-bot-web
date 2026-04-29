@@ -9,11 +9,18 @@ export async function login(email, password) {
   return data;
 }
 
-export async function register(email, password, displayName) {
+export async function register(email, password, displayName, discordUsername = null) {
+  const payload = {
+    email: email.trim(),
+    password,
+    displayName,
+    discordUsername: typeof discordUsername === 'string' && discordUsername.trim() ? discordUsername.trim() : null,
+  };
+
   const res = await fetch('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.trim(), password, displayName }),
+    body: JSON.stringify(payload),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);

@@ -63,6 +63,7 @@ function LoginForm({ onLogin }) {
 function RegisterForm({ onLogin }) {
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [discordUsername, setDiscordUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,7 +79,7 @@ function RegisterForm({ onLogin }) {
     setLoading(true);
     setError(null);
     try {
-      const data = await register(email, password, displayName.trim());
+      const data = await register(email, password, displayName.trim(), discordUsername);
       onLogin?.(data);
     } catch (err) {
       setError(err.message);
@@ -114,6 +115,18 @@ function RegisterForm({ onLogin }) {
           onChange={e => setEmail(e.target.value)}
           disabled={loading}
           required
+        />
+      </label>
+      <label className="field">
+        <span className="field__label">Discord username (optional)</span>
+        <input
+          className="field__input"
+          type="text"
+          autoComplete="off"
+          placeholder="Ex.: oincriveltinga"
+          value={discordUsername}
+          onChange={e => setDiscordUsername(e.target.value)}
+          disabled={loading}
         />
       </label>
       <label className="field">
