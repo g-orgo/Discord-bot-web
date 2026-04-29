@@ -7,18 +7,32 @@ export function useHistory(user) {
 
   const refresh = useCallback(async () => {
     const token = sessionStorage.getItem('raptor_token');
-    if (!token) return;
+    if (!token) return null;
     try {
       const data = await fetchHistory();
       const sessions = groupBySessions(Array.isArray(data) ? data : []);
-      setRecentHistory(sessions.slice(0, 3));
+      const next = sessions.slice(0, 3);
+      setRecentHistory(next);
+      return next;
     } catch {
       // silent — sidebar history is non-critical
+      return null;
     }
   }, []);
 
   useEffect(() => {
-    if (user) refresh();
+    if (!user) return;
+
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) {
+        refresh();
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [user, refresh]);
 
   function clear() {
