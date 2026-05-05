@@ -46,9 +46,9 @@ function renderHistory(entries = [], props = {}) {
 describe('History — session list', () => {
   beforeEach(() => { mockDeleteSession.mockClear(); mockDeleteEntry.mockClear(); });
 
-  it('shows "No interactions yet" when empty', async () => {
+  it('shows empty state when history is empty', async () => {
     renderHistory([]);
-    await waitFor(() => expect(screen.getByText(/no interactions yet/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/no history yet\. start chatting!/i)).toBeInTheDocument());
   });
 
   it('renders one card per session', async () => {
