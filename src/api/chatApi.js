@@ -1,17 +1,37 @@
-export async function sendMessage(message) {
+export async function sendMessage(message, userId = null, authToken = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  
+  // Add auth headers if user is authenticated
+  if (userId) {
+    headers['X-User-ID'] = userId;
+  }
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ message }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
-export async function sendMessageStream(message, onToken, onDone, onError) {
+export async function sendMessageStream(message, onToken, onDone, onError, userId = null, authToken = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  
+  // Add auth headers if user is authenticated
+  if (userId) {
+    headers['X-User-ID'] = userId;
+  }
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   const res = await fetch('/api/chat/stream', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ message }),
   });
   if (!res.ok) {

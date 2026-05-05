@@ -120,7 +120,24 @@ export default function History({ user, onRestoreHistory }) {
                   </button>
                 </div>
               </div>
-              <p className="history__preview">{last.userMessage}</p>
+
+              {/* Show all exchanges in session */}
+              {session.entries && session.entries.length > 0 && (
+                <div className="history__exchanges">
+                  {session.entries.map((entry, ei) => (
+                    <div key={ei} className="history__exchange">
+                      <div className="history__user">
+                        <span className="history__label">You</span>
+                        <p className="history__text">{entry.userMessage}</p>
+                      </div>
+                      <div className="history__bot">
+                        <span className="history__label">Raptor</span>
+                        <p className="history__text">{entry.botResponse}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </li>
           );
         })}

@@ -47,7 +47,26 @@ export default function Chat({ user, restoredSession, onNewEntry }) {
     let fullText = '';
     let firstToken = true;
 
+    // Extract auth token if user is logged in
+    const token = user ? sessionStorage.getItem('raptor_token') : null;
+    const userId = user?.sub;
+
     try {
+      // Build onDone callback
+      const onDone = (model) => {
+        setStreaming(false);
+        setMessages(prev => {
+          const updated = [...prev];
+          const botMsg = { role: 'bot', text: fullText, model };
+          updated[updated.length - 1] = botMsg;
+          return updated;
+        });
+        if (user) {
+          saveHistoryEntry(text, fullText, model, sessionIdRef.current).then(() => onNewEntry?.()).catch(() => {});
+        }
+      };
+
+      // Call sendMessageStream with full parameters
       await sendMessageStream(
         text,
         (token) => {
@@ -65,21 +84,13 @@ export default function Chat({ user, restoredSession, onNewEntry }) {
             });
           }
         },
-        (model) => {
-          setStreaming(false);
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = { role: 'bot', text: fullText, model };
-            return updated;
-          });
-          if (user) {
-            saveHistoryEntry(text, fullText, model, sessionIdRef.current).then(() => onNewEntry?.()).catch(() => {});
-          }
-        },
+        onDone,
         () => {
           setLoading(false);
           setStreaming(false);
-        }
+        },
+        userId,
+        token
       );
     } catch {
       setMessages(prev => [...prev, { role: 'bot', text: 'Failed to reach Raptor LLM.', error: true }]);
