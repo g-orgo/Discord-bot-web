@@ -38,6 +38,8 @@ The Vite dev server proxies API calls automatically — no `.env` required:
 |------|------|---------------|
 | `/` | Chat | No |
 | `/personality` | Personality editor | Yes — redirects to `/auth` |
+| `/history` | Session history | Yes — redirects to `/auth` |
+| `/profile` | User profile (Discord link) | Yes — redirects to `/auth` |
 | `/auth` | Login / Register | No — redirects to `/` if already logged in |
 
 ## Features
@@ -46,6 +48,8 @@ The Vite dev server proxies API calls automatically — no `.env` required:
 - **Personality editor** — preset cards + custom prompt editor, persisted to `PUT /api/system-prompt`
 - **Auth** — login and register with JWT sessions stored in `sessionStorage`
 - **History** — chat history synced with the auth server, updated in real time via SSE
+- **Session restore** — history grouped by `sessionId`, with full-thread restore into chat
+- **Profile linking** — optional `discordUsername` bridge to merge Discord and web history
 
 ## Architecture
 
